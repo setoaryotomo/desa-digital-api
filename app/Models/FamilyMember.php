@@ -20,7 +20,16 @@ class FamilyMember extends Model
         'phone_number',
         'occupation',
         'marital_status',
+        'relation',
     ];
+
+    public function scopeSearch($query, $search) {
+        return $query->whereHas('user', function($query) use ($search){
+            $query->where('name', 'like', '%' . $search .'%')
+                ->orWhere('email', 'like', '%'. $search .'%');
+        })->orWhere('phone_number', 'like', '%'. $search .'%')
+        ->orWhere('identity_number', 'like', '%'. $search .'%');
+    }
 
     public function headOfFamily() {
         return $this->belongsTo(HeadOfFamily::class);
