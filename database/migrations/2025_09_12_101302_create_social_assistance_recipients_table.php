@@ -18,11 +18,11 @@ return new class extends Migration
             $table->uuid('head_of_family_id');
             $table->foreign('head_of_family_id')->references('id')->on('head_of_families');
             
-            $table->decimal('mount', 10, 2);
+            $table->decimal('amount', 10, 2);
             $table->longText('reason');
             $table->enum('bank', ['bri','bni','bca','mandiri']);
-            $table->integer('account_number');
-            $table->string('proof');
+            $table->bigInteger('account_number');
+            $table->string('proof')->nullable();
             $table->enum('status', ['pending', 'approved','rejected'])->default('pending');
             $table->softDeletes();
             $table->timestamps();
