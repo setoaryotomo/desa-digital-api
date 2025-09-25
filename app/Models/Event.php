@@ -8,19 +8,30 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use SoftDeletes,UUID;
+    use SoftDeletes, UUID;
 
     protected $fillable = [
-        'thumbnail',
+        'thumnail',
         'name',
         'description',
         'price',
         'date',
         'time',
         'is_active'
+
     ];
 
-    public function eventParticipant(){
+    protected $casts = [
+        'price' => 'decimal:2'
+    ];
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where('name', 'like', '%' . $search . '%');
+    }
+
+    public function eventParticipant()
+    {
         return $this->hasMany(EventParticipant::class);
     }
 }
