@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Profile extends Model
 {
-    use SoftDeletes,UUID;
+    use SoftDeletes, UUID;
 
     protected $fillable = [
         'thumbnail',
@@ -17,10 +17,16 @@ class Profile extends Model
         'headman',
         'people',
         'agricultural_area',
-        'total_area',
+        'total_area'
     ];
 
-    public function profileImage(){
+    protected $casts = [
+        'agricultural_area' => 'decimal:2',
+        'total_area' => 'decimal:2'
+    ];
+
+    public function profileImages()
+    {
         return $this->hasMany(ProfileImage::class);
     }
 }

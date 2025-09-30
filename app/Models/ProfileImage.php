@@ -8,14 +8,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProfileImage extends Model
 {
-    use SoftDeletes,UUID;
+    use SoftDeletes, UUID;
 
     protected $fillable = [
         'profile_id',
         'image'
+
     ];
 
-    public function profile(){
+    public function profile()
+    {
         return $this->belongsTo(Profile::class);
     }
 }
