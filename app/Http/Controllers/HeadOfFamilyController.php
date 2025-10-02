@@ -8,17 +8,30 @@ use App\Http\Requests\HeadOfFamilyUpdateRequest;
 use App\Http\Resources\HeadOfFamilyResource;
 use App\Http\Resources\PaginateResource;
 use App\Interfaces\HeadOfFamilyRepositoryInterface;
+use App\Models\HeadOfFamily;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class HeadOfFamilyController extends Controller
+class HeadOfFamilyController extends Controller implements HasMiddleware
 {
     private HeadOfFamilyRepositoryInterface $headOfFamilyRepository;
 
-    public function __construct(HeadOfFamilyRepositoryInterface $headOfFamilyRepositoryInterface)
+    public function __construct(HeadOfFamilyRepositoryInterface $headOfFamilyRepository)
     {
-        $this->headOfFamilyRepository = $headOfFamilyRepositoryInterface;
+        $this->headOfFamilyRepository = $headOfFamilyRepository;
     }
 
+    public static function middleware()
+    {
+        return [
+            new Middleware(PermissionMiddleware::using(['head-of-family-list|head-of-family-create|head-of-family-edit|head-of-family-delete']), only: ['index', 'getAllPaginated', 'show']),
+            new middleware(PermissionMiddleware::using(['head-of-family-create']), only: ['store']),
+            new middleware(PermissionMiddleware::using(['head-of-family-edit']), only: ['update']),
+            new middleware(PermissionMiddleware::using(['head-of-family-delete']), only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -31,9 +44,9 @@ class HeadOfFamilyController extends Controller
                 true
             );
 
-            return ResponseHelper::JsonResponse(true, 'Data kepala keluarga berhasil diambil', HeadOfFamilyResource::collection($headOfFamilies), 200);
+            return ResponseHelper::JsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', HeadOfFamilyResource::collection($headOfFamilies), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::JsonResponse(true, 'Data kepala keluarga gagal diambil', null, 500);
+            return ResponseHelper::JsonResponse(true, 'Data Kepala Keluarga Gagal Diambil', null, 500);
         }
     }
 
@@ -41,7 +54,7 @@ class HeadOfFamilyController extends Controller
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer',
+            'row_per_page' => 'required|integer'
         ]);
 
         try {
@@ -50,9 +63,9 @@ class HeadOfFamilyController extends Controller
                 $request['row_per_page']
             );
 
-            return ResponseHelper::JsonResponse(true, 'Data kepala keluarga berhasil diambil', PaginateResource::make($headOfFamilies, HeadOfFamilyResource::class), 200);
+            return ResponseHelper::JsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', PaginateResource::make($headOfFamilies, HeadOfFamilyResource::class), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::JsonResponse(true, 'Data kepala keluarga gagal diambil', null, 500);
+            return ResponseHelper::JsonResponse(true, 'Data Kepala Keluarga Gagal Diambil', null, 500);
         }
     }
 
@@ -66,9 +79,9 @@ class HeadOfFamilyController extends Controller
         try {
             $headOfFamily = $this->headOfFamilyRepository->create($request);
 
-            return ResponseHelper::JsonResponse(true,'Kepala Keluarga Berhasil Ditambhakan',new HeadOfFamilyResource($headOfFamily), 201);
+            return ResponseHelper::JsonResponse(true, 'Kepala Keluarga Berhasil ditambahkan', new HeadOfFamilyResource($headOfFamily), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::JsonResponse(false, $e->getMessage(),null,500);
+            return ResponseHelper::JsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
@@ -83,12 +96,12 @@ class HeadOfFamilyController extends Controller
             );
 
             if (!$headOfFamily) {
-                return ResponseHelper::JsonResponse(false,'Kepala keluarga tdk ditemukan', null, 404);
+                return ResponseHelper::jsonResponse(false, 'Kepala keluarga tidak ditemukan', null, 404);
             }
 
-            return ResponseHelper::JsonResponse(true,'Detail kepala keluarga berhasil diambil', new HeadOfFamilyResource($headOfFamily), 200);
+            return ResponseHelper::JsonResponse(true, 'Detail Kepala Keluarga berhasil ditampilkan', new HeadOfFamilyResource($headOfFamily), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::JsonResponse(false, $e->getMessage(),null,500);
+            return ResponseHelper::JsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
@@ -105,7 +118,7 @@ class HeadOfFamilyController extends Controller
             );
 
             if (!$headOfFamily) {
-                return ResponseHelper::JsonResponse(false,'kepala keluarga tidak ditemukan', null ,404);
+                return ResponseHelper::JsonResponse(false, 'Kepala Keluarga tidak Ditemukan', null, 404);
             }
 
             $headOfFamily = $this->headOfFamilyRepository->update(
@@ -113,9 +126,9 @@ class HeadOfFamilyController extends Controller
                 $request
             );
 
-            return ResponseHelper::JsonResponse(true,'Kepala Keluarga Berhasil Diupdate',new HeadOfFamilyResource($headOfFamily), 201);
+            return ResponseHelper::JsonResponse(true, 'Kepala Keluarga Berhasil diupdate', new HeadOfFamilyResource($headOfFamily), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::JsonResponse(false, $e->getMessage(),null,500);
+            return ResponseHelper::JsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
@@ -125,20 +138,21 @@ class HeadOfFamilyController extends Controller
     public function destroy(string $id)
     {
         try {
-            $headOfFamily = $this->headOfFamilyRepository->getById($id);
+            $headOfFamily = $this->headOfFamilyRepository->getById(
+                $id
+            );
 
             if (!$headOfFamily) {
-                return ResponseHelper::JsonResponse(false,'kepala keluarga tidak ditemukan', null ,404);
+                return ResponseHelper::JsonResponse(false, 'Kepala Keluarga tidak Ditemukan', null, 404);
             }
 
             $headOfFamily = $this->headOfFamilyRepository->delete(
                 $id
-                
             );
 
-            return ResponseHelper::JsonResponse(true,'Kepala Keluarga Berhasil Dihapus',null, 200);
+            return ResponseHelper::JsonResponse(true, 'Kepala Keluarga Berhasil dihapus', null, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::JsonResponse(false, $e->getMessage(),null,500);
+            return ResponseHelper::JsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 }

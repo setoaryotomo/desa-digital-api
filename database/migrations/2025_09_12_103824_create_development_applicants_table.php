@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('development_applicants', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('develompent_id');
-            $table->foreign('develompent_id')->references('id')->on('developments');
+            $table->uuid('development_id');
+            $table->foreign('development_id')->references('id')->on('developments');
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users');
             $table->enum('status', ['pending','approved','rejected'])->default('pending');

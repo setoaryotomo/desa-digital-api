@@ -13,7 +13,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class DevelopmentApplicantController extends Controller
+class DevelopmentApplicantController extends Controller implements HasMiddleware
 {
     private DevelopmentApplicantRepositoryInterface $developmentApplicantRepository;
 
@@ -22,15 +22,15 @@ class DevelopmentApplicantController extends Controller
         $this->developmentApplicantRepository = $developmentApplicantRepository;
     }
 
-    // public static function middleware()
-    // {
-    //     return [
-    //         new Middleware(PermissionMiddleware::using(['development-applicant-list|development-applicant-create|development-applicant-edit|development-applicant-delete']), only: ['index', 'getAllPaginated', 'show']),
-    //         new middleware(PermissionMiddleware::using(['development-applicant-create']), only: ['store']),
-    //         new middleware(PermissionMiddleware::using(['development-applicant-edit']), only: ['update']),
-    //         new middleware(PermissionMiddleware::using(['development-applicant-delete']), only: ['destroy']),
-    //     ];
-    // }
+    public static function middleware()
+    {
+        return [
+            new Middleware(PermissionMiddleware::using(['development-applicant-list|development-applicant-create|development-applicant-edit|development-applicant-delete']), only: ['index', 'getAllPaginated', 'show']),
+            new middleware(PermissionMiddleware::using(['development-applicant-create']), only: ['store']),
+            new middleware(PermissionMiddleware::using(['development-applicant-edit']), only: ['update']),
+            new middleware(PermissionMiddleware::using(['development-applicant-delete']), only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -97,7 +97,7 @@ class DevelopmentApplicantController extends Controller
                 return ResponseHelper::JsonResponse(false, 'Data Pendaftar Pembangunan Tidak Ditemukan', null, 404);
             }
 
-            return ResponseHelper::JsonResponse(true, 'Data Pendaftar Pembangunan Berhasil Ditemukan', new DevelopmentApplicantResource($developmentAplicant), 200);
+            return ResponseHelper::JsonResponse(true, 'Data Pendaftar Pembangunan Berhasil Dibuat', new DevelopmentApplicantResource($developmentAplicant), 200);
         } catch (\Exception $e) {
             return ResponseHelper::JsonResponse(false, $e->getMessage(), null, 500);
         }

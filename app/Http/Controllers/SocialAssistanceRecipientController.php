@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\SocialAssistanceRecipientStoreRequest;
-use App\Http\Requests\SocialAssistanceRecipientUpdateRequest;
 use App\Http\Requests\SocialAssistanceRecipientUpdateRequst;
 use App\Http\Resources\PaginateResource;
 use App\Http\Resources\SocialAssistanceRecipientResource;
@@ -15,7 +14,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class SocialAssistanceRecipientController extends Controller
+class SocialAssistanceRecipientController extends Controller implements HasMiddleware
 {
 
     private SocialAssistanceRecipientRepositoryInterface $socialAssistanceRecipientRepository;
@@ -25,15 +24,15 @@ class SocialAssistanceRecipientController extends Controller
         $this->socialAssistanceRecipientRepository = $socialAssistanceRecipientRepository;
     }
 
-    // public static function middleware()
-    // {
-    //     return [
-    //         new Middleware(PermissionMiddleware::using(['social-assistance-recipient-list|social-assistance-recipient-create|social-assistance-recipient-edit|social-assistance-recipient-delete']), only: ['index', 'getAllPaginated', 'show']),
-    //         new middleware(PermissionMiddleware::using(['social-assistance-recipient-create']), only: ['store']),
-    //         new middleware(PermissionMiddleware::using(['social-assistance-recipient-edit']), only: ['update']),
-    //         new middleware(PermissionMiddleware::using(['social-assistance-recipient-delete']), only: ['destroy']),
-    //     ];
-    // }
+    public static function middleware()
+    {
+        return [
+            new Middleware(PermissionMiddleware::using(['social-assistance-recipient-list|social-assistance-recipient-create|social-assistance-recipient-edit|social-assistance-recipient-delete']), only: ['index', 'getAllPaginated', 'show']),
+            new middleware(PermissionMiddleware::using(['social-assistance-recipient-create']), only: ['store']),
+            new middleware(PermissionMiddleware::using(['social-assistance-recipient-edit']), only: ['update']),
+            new middleware(PermissionMiddleware::using(['social-assistance-recipient-delete']), only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -108,7 +107,7 @@ class SocialAssistanceRecipientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SocialAssistanceRecipientUpdateRequest $request, string $id)
+    public function update(SocialAssistanceRecipientUpdateRequst $request, string $id)
     {
         $request = $request->validated();
 

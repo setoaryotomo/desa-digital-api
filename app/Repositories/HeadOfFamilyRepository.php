@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Repositories;
 
@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\DB;
 class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
 {
     public function getAll(
-        ?string $search, 
-        ?int $limit, 
-        bool $execute)
-    {
-        $query = HeadOfFamily::where(function ($query) use ($search){
+        ?string $search,
+        ?int $limit,
+        bool $execute
+    ) {
+        $query = HeadOfFamily::where(function ($query) use ($search) {
+
             if ($search) {
                 $query->search($search);
             }
@@ -23,6 +24,8 @@ class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
         $query->orderBy('created_at', 'desc');
 
         if ($limit) {
+
+            // take adalah mengambil beberapa berdasarkan limit
             $query->take($limit);
         }
 
@@ -34,27 +37,29 @@ class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
     }
 
     public function getAllPaginated(
-        ?string $search, 
+        ?string $search,
         ?int $rowPerPage
-    ){
-      $query = $this->getAll(
-        $search,
-        $rowPerPage,
-        false
-      );
+    ) {
+        $query = $this->getAll(
+            $search,
+            $rowPerPage,
+            false
+        );
 
-
-      return $query->paginate($rowPerPage);
+        return $query->paginate($rowPerPage);
     }
 
-    public function getById(string $id)
-    {
-        $query = HeadOfFamily::where('id',$id);
+    public function getById(
+        string $id
+    ) {
+        $query = HeadOfFamily::where('id', $id);
+
         return $query->first();
     }
 
-    public function create(array $data)
-    {
+    public function create(
+        array $data
+    ) {
         DB::beginTransaction();
 
         try {
@@ -63,12 +68,12 @@ class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
             $user = $userRepository->create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => $data['password'],
-            ]);
+                'password' => $data['password']
+            ])->assignRole('head-of-family');
 
             $headOfFamily = new HeadOfFamily;
             $headOfFamily->user_id = $user->id;
-            $headOfFamily->profile_picture = $data['profile_picture']->store('assets/head-of-families','public');
+            $headOfFamily->profile_picture = $data['profile_picture']->store('assets/head-of-families', 'public');
             $headOfFamily->identity_number = $data['identity_number'];
             $headOfFamily->gender = $data['gender'];
             $headOfFamily->date_of_birth = $data['date_of_birth'];
@@ -80,23 +85,27 @@ class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
             DB::commit();
 
             return $headOfFamily;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
         }
     }
 
-    public function update(string $id, array $data)
-    {
+    public function update(
+        string $id,
+        array $data
+    ) {
+
         DB::beginTransaction();
 
         try {
             $headOfFamily = HeadOfFamily::find($id);
 
             if (isset($data['profile_picture'])) {
-            $headOfFamily->profile_picture = $data['profile_picture']->store('assets/head-of-families','public');
+                $headOfFamily->profile_picture = $data['profile_picture']->store('assets/head-of-families', 'public');
             }
+
             $headOfFamily->identity_number = $data['identity_number'];
             $headOfFamily->gender = $data['gender'];
             $headOfFamily->date_of_birth = $data['date_of_birth'];
@@ -110,7 +119,7 @@ class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
             $userRepository->update($headOfFamily->user_id, [
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' =>isset($data['password']) ? bcrypt($data['password']) : $headOfFamily->user->password
+                'password' => isset($data['password']) ? bcrypt($data['password']) : $headOfFamily->user->password
             ]);
 
             DB::commit();
@@ -123,8 +132,9 @@ class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
         }
     }
 
-    public function delete(string $id)
-    {
+    public function delete(
+        string $id
+    ) {
         DB::beginTransaction();
 
         try {
